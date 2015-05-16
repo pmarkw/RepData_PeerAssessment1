@@ -1,35 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "pmarkw"
-date: "Friday, May 15, 2015"
-output: 
-  html_document:
-    keep_md: true
----
 
-
-## Loading and preprocessing the data
-
-First, set your working directory . . .
-```{r}
 setwd("C:/PMW/MyWorking.pmw/Coursera/RepData1/RepData_PeerAssessment1")
 
 options(scipen = 1, digits = 0)
 
-```
-
-
-then, read the data from file
-```{r}
 df <- read.csv("activity.csv")
 
-
-```
-
-
-## What is mean total number of steps taken per day?
-
-```{r}
 daily <- aggregate(df["steps"], by=df[c("date")], FUN=sum);
 
 hist(daily$steps)
@@ -38,23 +13,10 @@ avgdaily <- mean(daily$steps, na.rm = TRUE)
 
 print(avgdaily)
 
-```
-
-The mean total number of steps taken per day is `r avgdaily`.
-
-```{r}
-
 mediandaily <- median(daily$steps, na.rm = TRUE)
 
 print(mediandaily)
 
-```
-
-The median total number of steps taken per day is `r mediandaily`.
-
-## What is the average daily activity pattern?
-
-```{r}
 avginterval <- aggregate(df["steps"], by=df[c("interval")], FUN=mean, na.rm=TRUE)
 
 plot(avginterval$steps ~ avginterval$interval, type = "l")
@@ -63,35 +25,17 @@ maxinterval <- avginterval$interval[which.max(avginterval$steps)]
 
 print(maxinterval)
 
-```
-
-On average, the subject had the most number of steps during the `r maxinterval` interval.
-
-
-## Imputing missing values
-
-```{r}
 missing <- is.na(df$steps)
 dfmiss <- cbind(df, missing)
 nas <- subset(dfmiss, dfmiss$miss == TRUE)
 
 nascount <- nrow(nas)
 
-```
 
-There are `r nascount` rows in the dataset with a missing value (NA) for steps.
-
-I am using the mean number of steps for each 5 minute interval as an imputed value for NAs:
-
-```{r}
 num <- subset(dfmiss[,c(3,2,1)], dfmiss$miss == FALSE)
 impval <- merge(nas[,c(2,3)], avginterval , by = "interval")
 dfimp <- rbind(impval, num)
 
-```
-
-
-```{r}
 dailyimp <- aggregate(dfimp["steps"], by=dfimp[c("date")], FUN=sum);
 
 hist(dailyimp$steps)
@@ -100,43 +44,15 @@ avgdailyimp <- mean(dailyimp$steps, na.rm = TRUE)
 
 print(avgdailyimp)
 
-```
-
-The mean total number of steps taken per day with imputed values is `r avgdailyimp`.
-
-```{r}
-
-mediandailyimp <- median(dailyimp$steps)
+mediandailyimp <- median(dailyimp$steps, na.rm = TRUE)
 
 print(mediandailyimp)
-
-```
-
-The median total number of steps taken per day with imputed values is `r mediandailyimp`.
-
-There is no change to the average daily number of steps after imputing missing data. And while the histogram is taller, the shape remains the same.
-
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
-
-Create a new factor varibale in the dataset with tw levels -- "weekday" and "weekend":
-
-```{r}
 
 dfimp$date <- as.POSIXct(as.character(dfimp$date),tz="", "%Y-%m-%d")
 dfimp$day <- weekdays(dfimp$date)
 dfimp[which(dfimp$day == "Sunday"), "day"] <- "weekend"
 dfimp[which(dfimp$day == "Saturday"), "day"] <- "weekend"
 dfimp[which(dfimp$day != "weekend"), "day"] <- "weekday"
-
-```
-
-
-Plot weekend vs. weekday interval average . . .
-
-```{r}
 
 dfweekend <- dfimp[which(dfimp$day == "weekend"),]
 avgintwkend <- aggregate(dfweekend["steps"], by=dfweekend[c("interval")], FUN=mean)
@@ -146,11 +62,8 @@ avgintwkday <- aggregate(dfweekday["steps"], by=dfweekday[c("interval")], FUN=me
 
 
 par(mfcol = c(2,1))
-par(mar = c(2,2,2,2))
 plot(avgintwkend$steps ~ avgintwkend$interval, type = "l", main = "weekend")
 plot(avgintwkday$steps ~ avgintwkday$interval, type = "l", main = "weekday")
-
-```
 
 
 
